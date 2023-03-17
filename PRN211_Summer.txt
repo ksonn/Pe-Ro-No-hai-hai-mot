@@ -1,0 +1,99 @@
+Ket noi database 
+Winform : can tao ra file Appsetting.json
+		chinh no do not copy -> copy newer
+Web mvc: de y da duoc tao roi, neu chua co thi tao ra no 
+
+"ConnectionStrings": {
+    "ApDBConStr": "server=DESKTOP-2022KNJ\MSSQL; database=PE_PRN_Sum21;user=sa;password=12345"
+}
+
+
+----------------Dung ADO -------------------     
+B1: Tao class DAO
+B2: lay ten file appsetting.json
+B3: lay ten connectionString
+
+public static SqlConnection GetConnection()
+        {
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            string ConnectionStr = config.GetConnectionString("ApDBConStr");
+            return new SqlConnection(ConnectionStr);
+        }
+        
+        public static DataTable GetDataBySql(string sql, params SqlParameter[] parameters)
+        {
+            SqlCommand command = new SqlCommand(sql, GetConnection());
+            if (parameters != null || parameters.Length == 0) 
+                command.Parameters.AddRange(parameters);
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            adapter.SelectCommand = command;
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+            return dt;
+        }
+
+        public static int ExecuteBySql(string sql, params SqlParameter[] parameters)
+        {
+            SqlCommand command = new SqlCommand(sql, GetConnection());
+            if (parameters != null || parameters.Length == 0)
+                command.Parameters.AddRange(parameters);
+            command.Connection.Open();
+            int count = command.ExecuteNonQuery();
+            command.Connection.Close();
+            return count;
+        }
+
+Tao Models VD: Employee,Product, Student
+Tao class Function (dung de viet cac ham)
+
+------------- Dung entity framework ----------
+De y ki xem da add thu vien chua
+Neu chua add :
+Add 4 cai : - 2 cai sql
+ 	      1 design
+    	      1 json
+
+Rebuild project
+
+
+Tool-> Command line -> Developer Powshell
+vd
+B1 cd Q2(chi duong dan toi project Q2 tuong ung cau 2)
+
+
+B2 : Pate lenh vao
+dotnet ef dbcontext scaffold "server=DESKTOP-2022KNJ\MSSQL; database=PRN221_Spr22;user=sonnk;password=sonnk7" Microsoft.EntityFrameworkCore.SqlServer --output-dir Models
+
+B3 : Sua trong file QLCHcontext (QLCH la ten cua database)
+
+se co tu #waring xoa code trong if va pate doan duoi vao
+
+     var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+                optionsBuilder.UseSqlServer(config.GetConnectionString("ApDBConStr"));
+
+
+
+
+
+
+--------------- Dung cho web  tuong tu phan tren them 1 so pha
+vao file start up 
+
+B1 Tim toi function nay  
+  public void ConfigureServices(IServiceCollection services)
+
+
+Pate dong nay vao    services.AddControllersWithViews();
+
+B2:
+Tim toi :   public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+
+
+cau hinh duong dan url VD: /Home/Index
+
+    endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern:"{Controller=Home}/{Action=Index}"
+                    );
+
+Tao folder Controller vaf View
